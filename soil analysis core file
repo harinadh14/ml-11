@@ -1,0 +1,287 @@
+import pandas as pd
+import numpy as np
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import accuracy_score
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVR
+from sklearn import svm
+from sklearn.metrics import accuracy_score
+from sklearn.neighbors import KNeighborsRegressor
+
+dataset = pd.read_csv('training.csv')
+print(dataset.head())
+
+test = pd.read_csv('sorted_test.csv')
+test = test.values
+print(test.shape)
+print(dataset.shape)
+
+dataset = dataset.values
+cols = dataset.shape[1]-5
+
+X = dataset[:,1:cols-1]
+Y = dataset[:,cols:dataset.shape[1]]
+Y = Y.astype('float64') 
+
+X_train, X_test, y_train, y_test = train_test_split(X, Y, random_state=42, test_size=0.2, shuffle=True)
+
+
+categories = ['Ca','P','pH','SOC','Sand']
+
+for i in range(len(categories)):
+    rfc = SVR(kernel='rbf', C=1e2, gamma = 0.001, epsilon = 0.001)
+    rfc.fit(X_train, y_train[:,i])
+    svm_acc = rfc.score(X_test,y_test[:,i])*100
+    print(svm_acc)
+print("\n\n")
+for i in range(len(categories)):
+    rfc = KNeighborsRegressor(n_neighbors=3)
+    rfc.fit(X_train, y_train[:,i])
+    svm_acc = rfc.score(X_test,y_test[:,i])*100
+    print(svm_acc)  
+    from tkinter import messagebox
+from tkinter import *
+from tkinter.filedialog import askopenfilename
+from tkinter import simpledialog
+import tkinter
+import numpy as np
+from tkinter import filedialog
+import pandas as pd 
+import matplotlib.pyplot as plt 
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVR
+from sklearn.neighbors import KNeighborsRegressor
+main = tkinter.Tk()
+main.title("Soil Moisture Retrieval using Groundwater Dataset using Machine Learning Algorithm")
+main.geometry("1300x1200")
+
+
+global filename
+global dataset
+global X, Y
+global X_train, X_test, y_train, y_test
+svm_acc = []
+knn_acc = []  
+def upload():
+    global filename
+    global dataset
+    text.delete('1.0', END)
+    filename = filedialog.askdirectory(initialdir = ".")
+    text.delete('1.0', END)
+    text.insert(END,filename+' dataset loaded\n')
+    dataset = pd.read_csv(filename+'/training.csv')
+    dataset.fillna(0, inplace = True)
+    text.insert(END,str(dataset.head())+"\n")
+    text.insert(END,"Dataset contains total records    : "+str(dataset.shape[0])+"\n")
+    text.insert(END,"Dataset contains total attributes : "+str(dataset.shape[1])+"\n")
+    def processDataset():
+        global dataset
+        global X, Y
+        global X_train, X_test, y_train, y_test
+        text.delete('1.0', END)
+
+        test = pd.read_csv(filename+'/sorted_test.csv')
+        test = test.values
+        dataset = dataset.values
+        cols = dataset.shape[1]-5
+        X = dataset[:,1:cols-1]
+        Y = dataset[:,cols:dataset.shape[1]]
+        Y = Y.astype('float64') 
+        X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
+        text.insert(END,"Total records used to train SVM or KNN is : "+str(dataset.shape[0])+"\n")
+        text.insert(END,"Total records used to test SVM or KNN is : "+str(test.shape[0])+"\n")
+    def runSVM():
+            
+        global X_train, X_test, y_train, y_test
+        text.delete('1.0', END)
+        svm_acc.clear()
+
+    categories = ['Ca','P','pH','SOC','Sand']
+    for i in range(len(categories)):
+        rfc = SVR(kernel='rbf', C=1e2, gamma = 0.001, epsilon = 0.001)
+        rfc.fit(X_train, y_train[:,i])
+        acc = rfc.score(X_test,y_test[:,i])*100
+        text.insert(END,"SVM accuracy for class label "+categories[i]+" is : "+str(acc)+"\n")
+        svm_acc.append(acc)
+    
+def runKNN():
+    global X_train, X_test, y_train, y_test
+    knn_acc.clear()
+    text.insert(END,"\n")
+    categories = ['Ca','P','pH','SOC','Sand']
+    for i in range(len(categories)):
+        rfc = KNeighborsRegressor(n_neighbors=3)
+        rfc.fit(X_train, y_train[:,i])
+        acc = rfc.score(X_test,y_test[:,i])*100
+        text.insert(END,"KNN accuracy for class label "+categories[i]+" is : "+str(acc)+"\n")
+        knn_acc.append(acc)
+
+def graph(): 
+    plt.figure(figsize=(10,6))
+    plt.grid(True)
+    plt.xlabel('Class Labels')
+    plt.ylabel('Accuracy')
+    plt.plot(svm_acc, 'ro-', color = 'blue')
+    plt.plot(knn_acc, 'ro-', color = 'orange')
+    plt.legend(['SVM Accuracy', 'KNN Accuracy'], loc='upper left')
+    #plt.xticks(wordloss.index)
+    plt.title('SVM & KNN Accuracy Comparison Graph')
+    plt.show()
+    
+def close():
+    main.destroy()
+
+font = ('times', 16, 'bold')
+title = Label(main, text='Soil Moisture Retrieval using Groundwater Dataset using Machine Learning Algorithm')
+title.config(bg='dark goldenrod', fg='white')  
+title.config(font=font)           
+title.config(height=3, width=120)       
+title.place(x=0,y=5)
+
+font1 = ('times', 14, 'bold')
+upload = Button(main, text="Upload Soil Groundwater Dataset", command=upload)
+upload.place(x=700,y=100)
+
+from tkinter import messagebox
+from tkinter import *
+from tkinter.filedialog import askopenfilename
+from tkinter import simpledialog
+import tkinter
+import numpy as np
+from tkinter import filedialog
+import pandas as pd 
+import matplotlib.pyplot as plt
+
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVR
+from sklearn.neighbors import KNeighborsRegressor
+
+
+main = tkinter.Tk()
+main.title("Soil Moisture Retrieval using Groundwater Dataset using Machine Learning Algorithm")
+main.geometry("1300x1200")
+
+
+global filename
+global dataset
+global X, Y
+global X_train, X_test, y_train, y_test
+svm_acc = []
+knn_acc = []
+
+def upload():
+    global filename
+    global dataset
+    text.delete('1.0', END)
+    filename = filedialog.askdirectory(initialdir = ".")
+    text.delete('1.0', END)
+    text.insert(END,filename+' dataset loaded\n')
+    dataset = pd.read_csv(filename+'/training.csv')
+    dataset.fillna(0, inplace = True)
+    text.insert(END,str(dataset.head())+"\n")
+    text.insert(END,"Dataset contains total records    : "+str(dataset.shape[0])+"\n")
+    text.insert(END,"Dataset contains total attributes : "+str(dataset.shape[1])+"\n")
+    
+def processDataset():
+    global dataset
+    global X, Y
+    global X_train, X_test, y_train, y_test
+    text.delete('1.0', END)
+
+    test = pd.read_csv(filename+'/sorted_test.csv')
+    test = test.values
+    dataset = dataset.values
+    cols = dataset.shape[1]-5
+    X = dataset[:,1:cols-1]
+    Y = dataset[:,cols:dataset.shape[1]]
+    Y = Y.astype('float64') 
+    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
+    text.insert(END,"Total records used to train SVM or KNN is : "+str(dataset.shape[0])+"\n")
+    text.insert(END,"Total records used to test SVM or KNN is : "+str(test.shape[0])+"\n")
+    
+
+
+def runSVM():
+    global X_train, X_test, y_train, y_test
+    text.delete('1.0', END)
+    svm_acc.clear()
+
+    categories = ['Ca','P','pH','SOC','Sand']
+    for i in range(len(categories)):
+        rfc = SVR(kernel='rbf', C=1e2, gamma = 0.001, epsilon = 0.001)
+        rfc.fit(X_train, y_train[:,i])
+        acc = rfc.score(X_test,y_test[:,i])*100
+        text.insert(END,"SVM accuracy for class label "+categories[i]+" is : "+str(acc)+"\n")
+        svm_acc.append(acc)
+    
+def runKNN():
+    global X_train, X_test, y_train, y_test
+    knn_acc.clear()
+    text.insert(END,"\n")
+    categories = ['Ca','P','pH','SOC','Sand']
+    for i in range(len(categories)):
+        rfc = KNeighborsRegressor(n_neighbors=3)
+        rfc.fit(X_train, y_train[:,i])
+        acc = rfc.score(X_test,y_test[:,i])*100
+        text.insert(END,"KNN accuracy for class label "+categories[i]+" is : "+str(acc)+"\n")
+        knn_acc.append(acc)
+
+def graph():
+    plt.figure(figsize=(10,6))
+    plt.grid(True)
+    plt.xlabel('Class Labels')
+    plt.ylabel('Accuracy')
+    plt.plot(svm_acc, 'ro-', color = 'blue')
+    plt.plot(knn_acc, 'ro-', color = 'orange')
+    plt.legend(['SVM Accuracy', 'KNN Accuracy'], loc='upper left')
+    #plt.xticks(wordloss.index)
+    plt.title('SVM & KNN Accuracy Comparison Graph')
+    plt.show()
+    
+def close():
+    main.destroy()
+
+font = ('times', 16, 'bold')
+title = Label(main, text='Soil Moisture Retrieval using Groundwater Dataset using Machine Learning Algorithm')
+title.config(bg='dark goldenrod', fg='white')  
+title.config(font=font)           
+title.config(height=3, width=120)       
+title.place(x=0,y=5)
+
+font1 = ('times', 14, 'bold')
+upload = Button(main, text="Upload Soil Groundwater Dataset", command=upload)
+upload.place(x=700,y=100)
+upload.config(font=font1)  
+
+processButton = Button(main, text="Preprocess Dataset", command=processDataset)
+processButton.place(x=700,y=150)
+processButton.config(font=font1) 
+
+svmButton = Button(main, text="Train SVM Algorithm", command=runSVM)
+svmButton.place(x=700,y=200)
+svmButton.config(font=font1) 
+knnButton = Button(main, text="Train KNN Algorithm", command=runKNN)
+knnButton.place(x=700,y=250)
+knnButton.config(font=font1)
+
+graphButton = Button(main, text="Accuracy Comparison Graph", command=graph)
+graphButton.place(x=700,y=300)
+graphButton.config(font=font1)
+
+exitButton = Button(main, text="Exit", command=close)
+exitButton.place(x=700,y=350)
+exitButton.config(font=font1)
+
+
+font1 = ('times', 12, 'bold')
+text=Text(main,height=30,width=80)
+scroll=Scrollbar(text)
+text.configure(yscrollcommand=scroll.set)
+text.place(x=10,y=100)
+text.config(font=font1)
+
+
+main.config(bg='turquoise')
+main.mainloop()
